@@ -1,3 +1,6 @@
+# note that minor modification were made by me (adjusting agents and their fitness) while the rest is from
+# the multiagent-particle repo
+
 import numpy as np
 from multiagent.core import World, Agent, Landmark
 from multiagent.scenario import BaseScenario

@@ -1,5 +1,5 @@
 """
-This file contains the code that runs the project using NEAT.
+This file contains the code that runs the project using NEAT. Note that the code in this file is completely my own.
 Date:
     March 23, 2020
 Project:

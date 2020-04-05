@@ -1,3 +1,5 @@
+# Note that  the code for plot_stats_new_trial() and plot_best is my own
+
 from __future__ import print_function
 
 import copy
