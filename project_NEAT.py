@@ -24,10 +24,10 @@ env = make_env('environment')
 
 # load configs
 prey_config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
-                          neat.DefaultStagnation, "./configs/prey_config")
+                          neat.DefaultStagnation, "configs/prey_config")
 
 predator_config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
-                              neat.DefaultStagnation, "./configs/predator_config")
+                              neat.DefaultStagnation, "configs/predator_config")
 
 
 # Declare variables
