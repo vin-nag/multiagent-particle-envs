@@ -13,6 +13,7 @@ FONTSIZE = 16
 
 
 def plot_stats_new_trial(a, b, c, d, filename=''):
+    """ This function combines the statitistic reporters of the predator and prey species and produces graphs"""
 
     o_t_best, o_t_avg, o_t_stdev, o_y_best, o_y_avg, o_y_stdev = [], [], [], [], [], []
 
