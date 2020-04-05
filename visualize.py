@@ -6,59 +6,53 @@ import warnings
 import graphviz
 import matplotlib.pyplot as plt
 import numpy as np
+import neat
+
 
 FONTSIZE = 16
 
 
-def plot_stats(statistics, ylog=False, view=False, ptype=True, filename='avg_fitness'):
-    """ Plots the population's average and best fitness. """
-    if plt is None:
-        warnings.warn("This display is not available due to a missing optional dependency (matplotlib)")
-        return
+def plot_stats_new_trial(a, b, c, d, filename=''):
 
-    generation = range(len(statistics.most_fit_genomes))
-    best_fitness = [c.fitness for c in statistics.most_fit_genomes]
-    avg_fitness = np.array(statistics.get_fitness_mean())
-    stdev_fitness = np.array(statistics.get_fitness_stdev())
+    o_t_best, o_t_avg, o_t_stdev, o_y_best, o_y_avg, o_y_stdev = [], [], [], [], [], []
 
-    plot_avg_std(avg_fitness, stdev_fitness, generation, filename+"avg_fitness.png", ptype)
-    plot_best(best_fitness, filename+"best_fitness.png", ptype)
+    for i in range(len(a)):
+        t_stats = neat.StatisticsReporter()
+        t_stats.most_fit_genomes = a[i]
+        t_stats.generation_statistics = b[i]
 
-    """
-    plt.plot(generation, avg_fitness, 'b-', label="average")
-    #plt.plot(generation, avg_fitness - stdev_fitness, 'g-.', label="-1 sd")
-    plt.plot(generation, avg_fitness + stdev_fitness, 'g-.', label="+1 sd")
-    plt.plot(generation, best_fitness, 'r-', label="best")
+        o_t_best.append([c.fitness for c in t_stats.most_fit_genomes])
+        o_t_avg.append((t_stats.get_fitness_mean()))
+        o_t_stdev.append(t_stats.get_fitness_stdev())
 
-    plt.title("Population's average and best fitness")
-    plt.xlabel("Generations")
-    plt.ylabel("Fitness")
-    plt.grid()
-    plt.legend(loc="best")
-    if ylog:
-        plt.gca().set_yscale('symlog')
+        y_stats = neat.StatisticsReporter()
+        y_stats.most_fit_genomes = c[i]
+        y_stats.generation_statistics = d[i]
 
-    
-    plt.savefig(filename)
-    if view:
-        plt.show()
+        o_y_best.append([c.fitness for c in y_stats.most_fit_genomes])
+        o_y_avg.append((y_stats.get_fitness_mean()))
+        o_y_stdev.append(y_stats.get_fitness_stdev())
 
-    plt.close()
-    """
+    t_best_fitness = np.mean(o_t_best, axis=0)
+    t_avg_fitness = np.mean(o_t_avg, axis=0)
+    t_stdev_fitness = np.mean(o_t_stdev, axis=0)
 
-def plot_avg_std(avg, std, size, file, ptype=True,):
-    """This function plots an error-bar of the average and standard deviation"""
-    #plt.title(title)
-    plt.ylabel("Fitness (#)", fontsize=FONTSIZE)
-    plt.xlabel("Epochs (#)", fontsize=FONTSIZE)
-    plt.errorbar(size, avg, std, linestyle='None', marker='^')
-    plt.savefig(file)
-    plt.show()
+    y_best_fitness = np.mean(o_y_best, axis=0)
+    y_avg_fitness = np.mean(o_y_avg, axis=0)
+    y_stdev_fitness = np.mean(o_y_stdev, axis=0)
+
+    best_fitness = (t_best_fitness + y_best_fitness) / 2.0
+    plot_best(best_fitness, filename+"overall_best_fitness.png")
+
+    avg_fitness = (t_avg_fitness + y_avg_fitness) / 2.0
+    plot_best(avg_fitness, filename + "overall_avg_fitness.png")
+
+    stdev_fitness = (t_stdev_fitness + y_stdev_fitness) / 2.0
+    plot_best(stdev_fitness, filename + "overall_stdev_fitness.png")
 
 
-def plot_best(best, file, ptype=True):
+def plot_best(best, file):
     """This function plots a single array"""
-    #plt.title(title)
     plt.ylabel("Fitness (#)", fontsize=FONTSIZE)
     plt.xlabel("Epochs (#)", fontsize=FONTSIZE)
     plt.plot([x for x in range(len(best))], best)

@@ -20,7 +20,7 @@ import visualize
 
 
 # Create Environment
-env = make_env('simple_tag_one')
+env = make_env('environment')
 
 # load configs
 prey_config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction, neat.DefaultSpeciesSet,
@@ -87,8 +87,11 @@ def eval_predator_population(genomes, config):
         genome.fitness = eval_individual(is_prey=False)
 
 
-def run_experiment(num_trials, num_epochs, num_runs, reports=False, plots=True, view=True) -> None:
+def run_experiment(num_trials, num_epochs, num_runs, reports=False, plots=True, view=False) -> None:
     """This function runs the entire experiment for the desired number of trials"""
+
+    o_predator_most_fit_genomes, o_predator_generation_statistics = [], []
+    o_prey_most_fit_genomes, o_prey_generation_statistics = [], []
 
     # single trial
     def single_trial(epochs, runs):
@@ -107,7 +110,7 @@ def run_experiment(num_trials, num_epochs, num_runs, reports=False, plots=True, 
         for i in range(epochs):
             print("Starting epoch {}".format(i))
 
-            ########### Train predator
+            # Train predator
             if i == 0:
                 predator_population = neat.Population(predator_config)
             else:
@@ -132,7 +135,7 @@ def run_experiment(num_trials, num_epochs, num_runs, reports=False, plots=True, 
             best_predator = predator_population.run(eval_predator_population, runs)
             predator_brain = neat.nn.FeedForwardNetwork.create(best_predator, predator_config)
 
-            ########### Train prey
+            # Train prey
             if i == 0:
                 prey_population = neat.Population(prey_config)
             else:
@@ -167,40 +170,38 @@ def run_experiment(num_trials, num_epochs, num_runs, reports=False, plots=True, 
                 prey_most_fit_genomes = prey_stats.most_fit_genomes
                 prey_generation_statistics = prey_stats.generation_statistics
 
-        if plots:
-            # plot predator stats
-            visualize.plot_stats(predator_stats, ylog=False, view=False, ptype=True, filename="./results_experiment/plots/predator/epochs={}_runs={}_".format(num_epochs, num_runs))
-            visualize.plot_species(predator_stats, filename="./results_experiment/plots/predator/epochs={}_runs={}_.species.svg".format(num_epochs, num_runs))
-            visualize.draw_net(predator_config, best_predator,
-                               filename="./results_experiment/plots/predator/epochs={}_runs={}_.net".format(num_epochs, num_runs))
-
-            # plot prey stats
-            visualize.plot_stats(prey_stats, ylog=False, view=False, ptype=False, filename="./results_experiment/plots/prey/epochs={}_runs={}".format(num_epochs, num_runs))
-            visualize.plot_species(prey_stats, filename="./results_experiment/plots/prey/epochs={}_runs={}_.species.svg".format(num_epochs, num_runs))
-            visualize.draw_net(prey_config, best_prey,
-                               filename="./results_experiment/plots/prey/epochs={}_runs={}_.net".format(num_epochs, num_runs))
-
-        if view:
-            view_run(steps=STEPS, record=True,
-                     info="epochs={}_runs={}_current_gens={}".format(num_epochs, num_runs, gen_count))
-
-        return
+        return predator_most_fit_genomes, predator_generation_statistics, prey_most_fit_genomes, prey_generation_statistics
 
     # outer loop to run trials
     for j in range(num_trials):
         print("Starting Trial {}".format((j+1)))
-        single_trial(num_epochs, num_runs)
+        a, b, c, d = single_trial(num_epochs, num_runs)
+        o_predator_most_fit_genomes.append(a)
+        o_predator_generation_statistics.append(b)
+        o_prey_most_fit_genomes.append(c)
+        o_prey_generation_statistics.append(d)
+
+    if plots:
+        # plot stats
+        visualize.plot_stats_new_trial(o_predator_most_fit_genomes,
+                                       o_predator_generation_statistics,
+                                       o_prey_most_fit_genomes,
+                                       o_prey_generation_statistics,
+                                       filename="./results/plots/trials={}_epochs={}_runs={}_".format(
+                                           num_trials, num_epochs, num_runs))
+
+        if view:
+            view_run_record(steps=STEPS,
+                     info="epochs={}_runs={}".format(num_epochs, num_runs))
 
     # Completed experiment
     print('\n Completed Experiment')
     return
 
 
-def view_run(steps, record=False, info="") -> None:
+def view_run_record(steps, info="") -> None:
     """ This function runs the simulation, rendering it so we can see"""
-    if record:
-        env_local = wrappers.Monitor(env, './results_experiment/videos/' + info + '/')
-
+    env_local = wrappers.Monitor(env, './results/videos/' + info + '/')
     obs = env_local.reset()
     # run the simulation
     for i in range(steps):
@@ -219,35 +220,18 @@ def main():
                         default=2, metavar='num_epochs',
                         help="the number of epochs to run")
     parser.add_argument("-t", "--num_trials", type=int,
-                        default=1, metavar='num_trials',
+                        default=2, metavar='num_trials',
                         help="the number of trials to run")
     parser.add_argument("-r", "--num_runs", type=int,
                         default=2, metavar="num_runs",
                         help="the number of runs for each epoch")
     parser.add_argument("-s", "--steps", type=int,
-                        default=100, metavar="steps",
+                        default=10, metavar="steps",
                         help="the number of steps to run for each simulation")
 
     args = parser.parse_args()
-    #run_experiment(args.num_trials, args.num_epochs, args.num_runs, view=True)
-
-    combinations = {
-        (1, 200, 1),
-        (1, 100, 2),
-        (1, 50, 4),
-        (1, 40, 5),
-        (1, 25, 8),
-        (1, 20, 10),
-        (1, 8, 25),
-        (1, 5, 40),
-        (1, 4, 50),
-        (1, 2, 100),
-        (1, 1, 200)
-    }
-    for combination in combinations:
-        print("using trials={}, epochs={}, runs={}".format(*combination))
-        #run_experiment(*combination)
-    run_experiment(1, 1, 1)
+    print("using trials={}, epochs={}, runs={}".format(args.num_trials, args.num_epochs, args.num_runs))
+    run_experiment(args.num_trials, args.num_epochs, args.num_runs)
 
 
 if __name__ == "__main__":
