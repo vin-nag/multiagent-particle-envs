@@ -219,13 +219,13 @@ def main():
     """
     parser = argparse.ArgumentParser(description="run the experiment using the given values")
     parser.add_argument("-e", "--num_epochs", type=int,
-                        default=2, metavar='num_epochs',
+                        default=200, metavar='num_epochs',
                         help="the number of epochs to run")
     parser.add_argument("-t", "--num_trials", type=int,
-                        default=2, metavar='num_trials',
+                        default=10, metavar='num_trials',
                         help="the number of trials to run")
     parser.add_argument("-r", "--num_runs", type=int,
-                        default=2, metavar="num_runs",
+                        default=1, metavar="num_runs",
                         help="the number of runs for each epoch")
     parser.add_argument("-s", "--steps", type=int,
                         default=10, metavar="steps",
