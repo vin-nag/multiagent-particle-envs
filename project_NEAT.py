@@ -64,6 +64,8 @@ def eval_individual(steps=STEPS, is_prey=True):
     for i in range(steps):
         action = [get_predator_action(obs[0]), get_prey_action(obs[1])]
         obs, rewards, _, _ = env.step(np.array(action))
+        # uncomment to view the training
+        # env.render()
         if is_prey:
             reward += rewards[1]
         else:
